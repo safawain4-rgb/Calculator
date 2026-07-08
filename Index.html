@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pink">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#FFE3ED" id="themeColorMeta" />
+<title>Kawaii Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-display: 'Baloo 2', sans-serif;
+    --font-ui: 'Quicksand', sans-serif;
+  }
+
+  html[data-theme="pink"]{
+    --bg-1:#FFE3ED;
+    --bg-2:#FFF3E9;
+    --body-color:#FFF1E6;
+    --body-shadow:rgba(255,140,170,.35);
+    --ear-outer:#FBE3D4;
+    --ear-inner:#FFAFC7;
+    --face-white:#FFFFFF;
+    --eye-color:#4A3226;
+    --display-bg:#FBF1EA;
+    --display-text:#5C4033;
+    --display-glow:rgba(255,143,174,.55);
+    --btn-fn-bg:#F5B8D3;
+    --btn-fn-text:#7A3B57;
+    --btn-op-bg:#FF7FA8;
+    --btn-op-text:#FFFFFF;
+    --btn-num-bg:#FF9BC0;
+    --btn-num-text:#FFFFFF;
+    --btn-eq-bg:#FF5C8D;
+    --btn-eq-text:#FFFFFF;
+    --accent:#FF5C8D;
+    --paw-bg:#FF7FA8;
+    --page-bg:#FDEFF3;
+  }
+
+  html[data-theme="bear"]{
+    --bg-1:#FFE9C2;
+    --bg-2:#FFD9A0;
+    --body-color:#E28A3D;
+    --body-shadow:rgba(150,90,20,.4);
+    --ear-outer:#BE6A26;
+    --ear-inner:#FFD666;
+    --face-white:#FFFDF8;
+    --eye-color:#3E2A1E;
+    --display-bg:#F3E3C6;
+    --display-text:#5C3A1E;
+    --display-glow:rgba(255,197,102,.6);
+    --btn-fn-bg:#F4D488;
+    --btn-fn-text:#6B4023;
+    --btn-op-bg:#FFBD3D;
+    --btn-op-text:#6B4023;
+    --btn-num-bg:#FFC94D;
+    --btn-num-text:#6B4023;
+    --btn-eq-bg:#D9722A;
+    --btn-eq-text:#FFF6E6;
+    --accent:#D9722A;
+    --paw-bg:#E8862E;
+    --page-bg:#FDF1DE;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    min-height:100vh; min-height:100dvh;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--page-bg);
+    font-family:var(--font-ui);
+    overflow:hidden;
+    touch-action:manipulation;
+    transition:background .5s ease;
+  }
+
+  .phone-frame{
+    position:relative;
+    width:100%; max-width:400px;
+    height:100vh; height:100dvh; max-height:860px;
+    overflow:hidden;
+    border-radius:44px;
+    box-shadow:0 30px 70px rgba(0,0,0,.18), 0 0 0 10px rgba(255,255,255,.5);
+    background:linear-gradient(160deg,var(--bg-1),var(--bg-2));
+    transition:background .6s ease;
+  }
+  @media (max-width:460px){
+    body{ background:var(--bg-2); }
+    .phone-frame{ max-height:100vh; max-height:100dvh; border-radius:0; box-shadow:none; }
+  }
+
+  .screen{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    opacity:0; pointer-events:none;
+    transform:translateY(12px);
+    overflow-y:auto;
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .screen.active{ opacity:1; pointer-events:auto; transform:translateY(0); }
+
+  /* ---------- shared bear parts ---------- */
+  .ear{ position:absolute; border-radius:50%; background:var(--ear-outer); }
+  .ear::after{
+    content:""; position:absolute; width:58%; height:58%; border-radius:50%;
+    background:var(--ear-inner); bottom:14%; left:50%; transform:translateX(-50%);
+  }
+  .eye{ position:absolute; border-radius:50%; background:var(--eye-color); }
+  .snout{ position:absolute; background:var(--face-white); border-radius:50%; display:flex; align-items:flex-end; justify-content:center; }
+
+  /* ---------- SPLASH ---------- */
+  #splash{ align-items:center; justify-content:center; background:linear-gradient(160deg,var(--bg-1),var(--bg-2)); cursor:pointer; }
+  .particle-layer{ position:absolute; inset:0; overflow:hidden; }
+  .particle{ position:absolute; bottom:-40px; font-size:20px; opacity:0; animation:floatUp linear infinite; }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) rotate(0deg); opacity:0; }
+    10%{ opacity:.85; }
+    90%{ opacity:.5; }
+    100%{ transform:translateY(-620px) rotate(25deg); opacity:0; }
+  }
+
+  .splash-logo-wrap{ text-align:center; z-index:2; }
+  .splash-bear{ width:110px; height:110px; margin:0 auto 18px; position:relative; animation:bounceIn 1s cubic-bezier(.34,1.56,.64,1) both; }
+  .splash-bear .ear{ width:36px; height:42px; top:-8px; }
+  .splash-bear .ear.l{ left:-4px; transform:rotate(-14deg); }
+  .splash-bear .ear.r{ right:-4px; transform:rotate(14deg); }
+  .splash-bear .head{ position:absolute; inset:8px; background:var(--face-white); border-radius:50%; box-shadow:0 10px 20px var(--body-shadow); }
+  .splash-bear .eye{ width:8px; height:8px; }
+  .splash-bear .eye.l{ left:26px; top:40px; }
+  .splash-bear .eye.r{ right:26px; top:40px; }
+  .splash-bear .snout{ width:34px; height:22px; left:30px; top:54px; }
+
+  @keyframes bounceIn{
+    0%{ transform:scale(0) rotate(-8deg); opacity:0; }
+    55%{ transform:scale(1.18) rotate(4deg); opacity:1; }
+    75%{ transform:scale(.92) rotate(-2deg); }
+    100%{ transform:scale(1) rotate(0); }
+  }
+
+  .splash-title{ font-family:var(--font-display); font-weight:800; font-size:28px; color:var(--eye-color); opacity:0; animation:fadeUp .7s ease .5s both; }
+  .splash-sub{ font-size:14px; color:var(--eye-color); opacity:0; margin-top:6px; animation:fadeUp .7s ease .8s both; }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+
+  .splash-tap-hint{ position:absolute; bottom:34px; left:0; right:0; text-align:center; font-size:12px; color:var(--eye-color); opacity:.6; animation:pulse 1.8s ease infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:.35; } 50%{ opacity:.75; } }
+
+  /* ---------- CALCULATOR SCREEN ---------- */
+  #calculator{ padding:18px 18px 24px; }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:4px 6px 14px; gap:8px; }
+  .app-name{ font-family:var(--font-display); font-weight:700; font-size:14px; color:var(--eye-color); opacity:.75; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .topbar-icons{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%; border:none;
+    background:rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center;
+    font-size:16px; cursor:pointer; color:var(--eye-color);
+    transition:transform .15s ease, background .5s ease;
+  }
+  .icon-btn:active{ transform:scale(.85); }
+  .paw-btn{ background:var(--paw-bg); }
+  .paw-btn.tapped{ animation:pawTap .4s ease; }
+  @keyframes pawTap{ 0%{ transform:scale(1); } 40%{ transform:scale(.78) rotate(-12deg); } 100%{ transform:scale(1); } }
+
+  .calc-body{
+    position:relative;
+    background:var(--body-color);
+    border-radius:36px;
+    padding:44px 16px 16px;
+    box-shadow:0 20px 40px var(--body-shadow), inset 0 -6px 0 rgba(0,0,0,.05);
+    flex:1; display:flex; flex-direction:column;
+    transition:background .6s ease, box-shadow .6s ease;
+  }
+  .calc-body .ear{ width:54px; height:62px; top:-22px; }
+  .calc-body .ear.l{ left:14px; transform:rotate(-16deg); }
+  .calc-body .ear.r{ right:14px; transform:rotate(16deg); }
+
+  .display{
+    background:var(--display-bg);
+    border-radius:22px;
+    padding:18px 18px 14px;
+    margin-bottom:14px;
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.08), 0 0 22px var(--display-glow);
+    min-height:78px;
+    display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
+    position:relative;
+    transition:background .6s ease;
+  }
+  .display .mem-flag{ position:absolute; left:18px; top:14px; font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--accent); opacity:0; transition:opacity .25s ease; }
+  .display .mem-flag.show{ opacity:1; }
+  .display .value{
+    font-family:var(--font-display); font-weight:700; font-size:34px; color:var(--display-text);
+    letter-spacing:.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+    transition:font-size .2s ease;
+  }
+  .display .value.long{ font-size:22px; }
+  .display .value.longer{ font-size:15px; }
+  .display .value.shake{ animation:shake .4s ease; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); }
+    60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); }
+  }
+
+  .face-row{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:16px; position:relative; height:34px; }
+  .face-row .eye{ width:9px; height:9px; position:static; }
+  .face-row .snout{ width:46px; height:30px; position:static; border-radius:50% 50% 48% 48%; align-items:center; justify-content:center; }
+  .face-row .snout span{ font-size:12px; color:var(--eye-color); transform:translateY(3px); }
+
+  .btn-grid{ display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:10px; flex:1; }
+  .btn{
+    border:none; border-radius:22px; cursor:pointer;
+    font-family:var(--font-ui); font-weight:700; font-size:19px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    box-shadow:0 4px 0 rgba(0,0,0,.08), 0 6px 14px rgba(0,0,0,.06);
+    text-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, background .5s ease, color .5s ease;
+    -webkit-user-select:none; user-select:none;
+  }
+  .btn.pressed{ transform:scale(.88) translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.08); transition:transform .06s ease-out, box-shadow .06s ease-out; }
+  .btn.fn{ background:var(--btn-fn-bg); color:var(--btn-fn-text); font-size:15px; }
+  .btn.op{ background:var(--btn-op-bg); color:var(--btn-op-text); font-size:22px; }
+  .btn.num{ background:var(--btn-num-bg); color:var(--btn-num-text); }
+  .btn.eq{ background:var(--btn-eq-bg); color:var(--btn-eq-text); grid-column:span 4; font-size:20px; }
+
+  .note-pop{ position:absolute; top:-6px; left:50%; transform:translate(-50%,0); font-size:14px; pointer-events:none; opacity:0; animation:notePop .7s ease forwards; }
+  @keyframes notePop{
+    0%{ opacity:0; transform:translate(-50%,0) scale(.6); }
+    30%{ opacity:1; transform:translate(-50%,-14px) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-30px) scale(.8); }
+  }
+
+  .sparkle-layer{ position:absolute; inset:0; pointer-events:none; z-index:50; overflow:hidden; }
+  .sparkle{ position:absolute; font-size:18px; opacity:1; animation:sparkleBurst .8s ease forwards; }
+  @keyframes sparkleBurst{
+    0%{ transform:translate(0,0) scale(.4); opacity:1; }
+    100%{ transform:translate(var(--tx),var(--ty)) scale(1.1); opacity:0; }
+  }
+
+  /* ---------- SETTINGS ---------- */
+  #settings{ padding:22px 20px; }
+  .settings-header{ display:flex; align-items:center; gap:12px; margin-bottom:26px; }
+  .settings-header h2{ font-family:var(--font-display); font-size:22px; color:var(--eye-color); margin:0; }
+
+  .settings-card{ background:rgba(255,255,255,.55); border-radius:24px; padding:18px; margin-bottom:16px; }
+  .settings-card h3{ font-family:var(--font-display); font-size:15px; color:var(--eye-color); margin:0 0 14px; }
+
+  .theme-options{ display:flex; gap:14px; }
+  .theme-pick{
+    flex:1; border-radius:20px; padding:14px 10px; text-align:center; cursor:pointer;
+    border:3px solid transparent; background:rgba(255,255,255,.6);
+    transition:border-color .25s ease, transform .15s ease;
+    font-family:var(--font-ui); font-weight:700; font-size:13px; color:var(--eye-color);
+  }
+  .theme-pick.active{ border-color:var(--accent); }
+  .theme-pick:active{ transform:scale(.96); }
+  .theme-swatch{ width:100%; height:52px; border-radius:14px; margin-bottom:8px; }
+  .theme-swatch.pink{ background:linear-gradient(135deg,#FFE3ED,#FF9BC0); }
+  .theme-swatch.bear{ background:linear-gradient(135deg,#FFE9C2,#E28A3D); }
+
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; }
+  .toggle-row .label{ display:flex; align-items:center; gap:8px; font-weight:700; color:var(--eye-color); font-size:14px; }
+  .note-indicator{ font-size:14px; opacity:.4; transition:opacity .3s ease; display:inline-block; }
+  .note-indicator.on{ opacity:1; animation:noteWiggle 1.6s ease infinite; }
+  @keyframes noteWiggle{ 0%,100%{ transform:rotate(0); } 50%{ transform:rotate(12deg); } }
+
+  .switch{ width:48px; height:28px; border-radius:20px; background:#e6dcd4; position:relative; cursor:pointer; border:none; transition:background .3s ease; padding:0; }
+  .switch::after{ content:""; position:absolute; width:22px; height:22px; border-radius:50%; background:#fff; top:3px; left:3px; transition:left .25s ease; box-shadow:0 2px 5px rgba(0,0,0,.2); }
+  .switch.on{ background:var(--accent); }
+  .switch.on::after{ left:23px; }
+
+  .settings-footer{ text-align:center; font-size:12px; color:var(--eye-color); opacity:.5; margin-top:auto; padding-top:10px; }
+
+  /* ---------- accessibility ---------- */
+  .btn:focus-visible, .icon-btn:focus-visible, .theme-pick:focus-visible, .switch:focus-visible{
+    outline:3px solid var(--accent); outline-offset:2px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+    }
+    .particle{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame" id="phone">
+
+  <!-- SPLASH -->
+  <div class="screen active" id="splash">
+    <div class="particle-layer" id="particles"></div>
+    <div class="splash-logo-wrap">
+      <div class="splash-bear">
+        <div class="ear l"></div>
+        <div class="ear r"></div>
+        <div class="head">
+          <div class="eye l"></div>
+          <div class="eye r"></div>
+          <div class="snout"></div>
+        </div>
+      </div>
+      <div class="splash-title">Kawaii Calculator</div>
+      <div class="splash-sub">cute calculations, every day 🌸</div>
+    </div>
+    <div class="splash-tap-hint">tap to continue</div>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div class="screen" id="calculator">
+    <div class="topbar">
+      <span class="app-name">🐻 Kawaii Calculator</span>
+      <div class="topbar-icons">
+        <button class="icon-btn paw-btn" id="pawToggle" aria-label="Switch theme">🐾</button>
+        <button class="icon-btn" id="openSettings" aria-label="Settings">⚙️</button>
+      </div>
+    </div>
+
+    <div class="calc-body">
+      <div class="ear l"></div>
+      <div class="ear r"></div>
+
+      <div class="display">
+        <span class="mem-flag" id="memFlag">M</span>
+        <span class="value" id="displayValue">0</span>
+      </div>
+
+      <div class="face-row">
+        <div class="eye"></div>
+        <div class="snout"><span>ω</span></div>
+        <div class="eye"></div>
+      </div>
+
+      <div class="btn-grid" id="btnGrid">
+        <button class="btn fn" data-action="clear">AC</button>
+        <button class="btn fn" data-action="mrc">MRC</button>
+        <button class="btn fn" data-action="mplus">M+</button>
+        <button class="btn fn" data-action="mminus">M−</button>
+
+        <button class="btn num" data-digit="7">7</button>
+        <button class="btn num" data-digit="8">8</button>
+        <button class="btn num" data-digit="9">9</button>
+        <button class="btn op" data-op="÷">÷</button>
+
+        <button class="btn num" data-digit="4">4</button>
+        <button class="btn num" data-digit="5">5</button>
+        <button class="btn num" data-digit="6">6</button>
+        <button class="btn op" data-op="×">×</button>
+
+        <button class="btn num" data-digit="1">1</button>
+        <button class="btn num" data-digit="2">2</button>
+        <button class="btn num" data-digit="3">3</button>
+        <button class="btn op" data-op="−">−</button>
+
+        <button class="btn op" data-action="percent">%</button>
+        <button class="btn num" data-digit="0">0</button>
+        <button class="btn num" data-digit=".">.</button>
+        <button class="btn op" data-op="+">+</button>
+
+        <button class="btn eq" data-action="equals">=</button>
+      </div>
+    </div>
+
+    <div class="sparkle-layer" id="sparkleLayer"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="settings">
+    <div class="settings-header">
+      <button class="icon-btn" id="closeSettings" aria-label="Back">←</button>
+      <h2>Settings</h2>
+    </div>
+
+    <div class="settings-card">
+      <h3>Theme</h3>
+      <div class="theme-options">
+        <div class="theme-pick" data-theme-pick="pink" tabindex="0" role="button">
+          <div class="theme-swatch pink"></div>
+          Pink &amp; Pastel
+        </div>
+        <div class="theme-pick" data-theme-pick="bear" tabindex="0" role="button">
+          <div class="theme-swatch bear"></div>
+          Brown &amp; Yellow
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h3>Sound</h3>
+      <div class="toggle-row">
+        <span class="label"><span class="note-indicator" id="noteIndicator">♪</span> Button tap sounds</span>
+        <button class="switch" id="soundSwitch" aria-label="Toggle sound"></button>
+      </div>
+    </div>
+
+    <div class="settings-footer">Made with 💕 for daily calculations</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const root = document.documentElement;
+  const $ = (sel,ctx=document)=>ctx.querySelector(sel);
+  const $$ = (sel,ctx=document)=>Array.from(ctx.querySelectorAll(sel));
+
+  /* ---------- screen navigation ---------- */
+  const screens = { splash:$('#splash'), calculator:$('#calculator'), settings:$('#settings') };
+  function showScreen(name){
+    Object.values(screens).forEach(s=>s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  let splashDone = false;
+  function leaveSplash(){
+    if(splashDone) return;
+    splashDone = true;
+    showScreen('calculator');
+  }
+  screens.splash.addEventListener('click', leaveSplash);
+  setTimeout(leaveSplash, 2600);
+
+  /* ---------- particles on splash ---------- */
+  const particleEmojis = ['✨','💕','⭐','🌸','💫'];
+  const particleLayer = $('#particles');
+  for(let i=0;i<14;i++){
+    const p = document.createElement('span');
+    p.className='particle';
+    p.textContent = particleEmojis[Math.floor(Math.random()*particleEmojis.length)];
+    p.style.left = Math.random()*90+'%';
+    p.style.fontSize = (12+Math.random()*14)+'px';
+    p.style.animationDuration = (4+Math.random()*3)+'s';
+    p.style.animationDelay = (Math.random()*2.2)+'s';
+    particleLayer.appendChild(p);
+  }
+
+  /* ---------- theme ---------- */
+  const themeColors = { pink:'#FFE3ED', bear:'#FFE9C2' };
+  function setTheme(theme){
+    root.setAttribute('data-theme', theme);
+    $$('.theme-pick').forEach(el=>el.classList.toggle('active', el.dataset.themePick===theme));
+    const meta = $('#themeColorMeta');
+    if(meta) meta.setAttribute('content', themeColors[theme] || themeColors.pink);
+  }
+  setTheme('pink');
+
+  $('#pawToggle').addEventListener('click', ()=>{
+    const cur = root.getAttribute('data-theme');
+    const next = cur==='pink' ? 'bear':'pink';
+    setTheme(next);
+    playTone(next==='bear'?[440,330]:[523,660]);
+    const btn = $('#pawToggle');
+    btn.classList.remove('tapped'); void btn.offsetWidth; btn.classList.add('tapped');
+  });
+
+  $$('.theme-pick').forEach(el=>{
+    el.addEventListener('click', ()=>{ setTheme(el.dataset.themePick); playTone([440,550]); });
+    el.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setTheme(el.dataset.themePick); playTone([440,550]); } });
+  });
+
+  /* ---------- settings nav ---------- */
+  $('#openSettings').addEventListener('click', ()=> showScreen('settings'));
+  $('#closeSettings').addEventListener('click', ()=> showScreen('calculator'));
+
+  /* ---------- sound ---------- */
+  let soundOn = true;
+  let audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+    if(audioCtx.state==='suspended'){ audioCtx.resume(); }
+  }
+  function playTone(freqs, dur, type){
+    freqs = freqs || [440]; dur = dur || 0.12; type = type || 'sine';
+    if(!soundOn) return;
+    try{
+      ensureAudio();
+      const now = audioCtx.currentTime;
+      freqs.forEach((f,i)=>{
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0.0001, now+i*0.09);
+        gain.gain.exponentialRampToValueAtTime(0.14, now+i*0.09+0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now+i*0.09+dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now+i*0.09);
+        osc.stop(now+i*0.09+dur+0.02);
+      });
+    }catch(e){ /* audio unsupported in this environment, fail silently */ }
+  }
+
+  const soundSwitch = $('#soundSwitch');
+  const noteIndicator = $('#noteIndicator');
+  function renderSoundSwitch(){
+    soundSwitch.classList.toggle('on', soundOn);
+    noteIndicator.classList.toggle('on', soundOn);
+  }
+  renderSoundSwitch();
+  soundSwitch.addEventListener('click', ()=>{ soundOn = !soundOn; renderSoundSwitch(); if(soundOn) playTone([523]); });
+
+  function showNotePop(btn){
+    if(!soundOn) return;
+    const pop = document.createElement('span');
+    pop.className='note-pop';
+    pop.textContent = Math.random()>0.5 ? '♪':'♫';
+    btn.appendChild(pop);
+    setTimeout(()=>pop.remove(), 720);
+  }
+
+  /* ---------- haptics ---------- */
+  function buzz(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+
+  /* ---------- calculator logic ---------- */
+  const displayEl = $('#displayValue');
+  const memFlag = $('#memFlag');
+
+  let current = '0';
+  let expression = '0';
+  let exprFresh = true;
+  let previous = null;
+  let operator = null;
+  let resetNext = false;
+  let memory = 0;
+  let justRecalled = false;
+
+  function render(){
+    displayEl.textContent = expression;
+    const len = expression.length;
+    displayEl.classList.toggle('long', len > 11 && len <= 19);
+    displayEl.classList.toggle('longer', len > 19);
+    memFlag.classList.toggle('show', memory !== 0);
+  }
+
+  function sanitizeNumber(n){
+    if(!isFinite(n)) return 'Error';
+    let rounded = Math.round(n*1e9)/1e9;
+    let str = String(rounded);
+    if(str.length > 12){
+      str = rounded.toPrecision(8).replace(/\.?0+$/,'').replace(/\.?0+e/,'e');
+      if(str.includes('e')) str = rounded.toExponential(4);
+    }
+    return str;
+  }
+
+  function inputDigit(d){
+    justRecalled = false;
+    if(current==='Error' || resetNext){
+      const seg = (d==='.') ? '0.' : d;
+      current = seg;
+      expression = exprFresh ? seg : (expression + seg);
+      exprFresh = false;
+      resetNext = false;
+      render();
+      return;
+    }
+    if(d==='.'){
+      if(!current.includes('.')){ current += '.'; expression += '.'; }
+      exprFresh = false;
+      render();
+      return;
+    }
+    if(current==='0'){ current = d; expression = d; } else { current += d; expression += d; }
+    exprFresh = false;
+    render();
+  }
+
+  function applyOperator(op){
+    if(current==='Error') return;
+    if(operator && !resetNext){ compute(false); }
+    previous = parseFloat(current);
+    if(exprFresh){ expression = current; }
+    expression += op;
+    operator = op;
+    resetNext = true;
+    exprFresh = false;
+    justRecalled = false;
+    render();
+  }
+
+  function compute(withSparkle){
+    if(operator===null || previous===null){ return; }
+    const cur = parseFloat(current);
+    let result;
+    switch(operator){
+      case '+': result = previous + cur; break;
+      case '−': result = previous - cur; break;
+      case '×': result = previous * cur; break;
+      case '÷':
+        if(cur===0){
+          expression += '=Error';
+          current='Error'; operator=null; previous=null; resetNext=true; exprFresh=true;
+          render(); shakeDisplay(); playTone([220,180],0.18,'triangle');
+          return;
+        }
+        result = previous / cur; break;
+      default: return;
+    }
+    current = sanitizeNumber(result);
+    expression += '=' + current;
+    operator = null; previous = null; resetNext = true; exprFresh = true; justRecalled=false;
+    render();
+    if(withSparkle && current!=='Error'){ sparkleFrom(displayEl); playTone([523,659,784],0.14,'sine'); }
+  }
+
+  function clearAll(){
+    current='0'; expression='0'; exprFresh=true;
+    previous=null; operator=null; resetNext=false; justRecalled=false;
+    render(); playTone([392,300],0.12,'triangle');
+  }
+
+  function percent(){
+    if(current==='Error') return;
+    justRecalled = false;
+    expression += '%';
+    const cur = parseFloat(current);
+    if(operator && previous!==null){ current = sanitizeNumber(previous * (cur/100)); }
+    else{ current = sanitizeNumber(cur/100); }
+    resetNext = true;
+    render();
+  }
+
+  function memPlus(){ if(current==='Error') return; memory += parseFloat(current); resetNext=true; exprFresh=true; justRecalled=false; render(); playTone([440,523],0.1); }
+  function memMinus(){ if(current==='Error') return; memory -= parseFloat(current); resetNext=true; exprFresh=true; justRecalled=false; render(); playTone([523,440],0.1); }
+  function memRecallClear(){
+    if(justRecalled){ memory = 0; justRecalled=false; playTone([300,240],0.12,'triangle'); }
+    else if(memory!==0){ current = sanitizeNumber(memory); expression = current; exprFresh=true; resetNext=true; justRecalled=true; playTone([494],0.12); }
+    render();
+  }
+
+  function shakeDisplay(){ displayEl.classList.remove('shake'); void displayEl.offsetWidth; displayEl.classList.add('shake'); }
+
+  function sparkleFrom(el){
+    const rect = el.getBoundingClientRect();
+    const frameRect = $('#phone').getBoundingClientRect();
+    const layer = $('#sparkleLayer');
+    const icons = ['✨','💖','⭐','💫'];
+    for(let i=0;i<7;i++){
+      const s = document.createElement('span');
+      s.className='sparkle';
+      s.textContent = icons[Math.floor(Math.random()*icons.length)];
+      const startX = rect.left - frameRect.left + rect.width*0.5;
+      const startY = rect.top - frameRect.top + rect.height*0.5;
+      s.style.left = startX+'px';
+      s.style.top = startY+'px';
+      const angle = Math.random()*Math.PI*2;
+      const dist = 50+Math.random()*60;
+      s.style.setProperty('--tx', Math.cos(angle)*dist+'px');
+      s.style.setProperty('--ty', Math.sin(angle)*dist+'px');
+      layer.appendChild(s);
+      setTimeout(()=>s.remove(), 820);
+    }
+  }
+
+  /* ---------- button wiring ---------- */
+  $$('.btn').forEach(btn=>{
+    const press = (e)=>{
+      e.preventDefault();
+      btn.classList.add('pressed');
+      buzz(10);
+      const digit = btn.dataset.digit;
+      const op = btn.dataset.op;
+      const action = btn.dataset.action;
+
+      if(digit!==undefined){
+        inputDigit(digit);
+        const df = isNaN(parseInt(digit,10)) ? 5 : parseInt(digit,10);
+        playTone([440+df*8], 0.09);
+      }
+      else if(op){ applyOperator(op); playTone([349], 0.1, 'triangle'); }
+      else if(action==='equals'){ compute(true); }
+      else if(action==='clear'){ clearAll(); }
+      else if(action==='percent'){ percent(); playTone([466],0.1); }
+      else if(action==='mplus'){ memPlus(); }
+      else if(action==='mminus'){ memMinus(); }
+      else if(action==='mrc'){ memRecallClear(); }
+
+      showNotePop(btn);
+    };
+    const release = ()=> btn.classList.remove('pressed');
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointerleave', release);
+    btn.addEventListener('pointercancel', release);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
